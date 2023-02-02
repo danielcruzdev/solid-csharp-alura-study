@@ -1,7 +1,6 @@
 using System;
-using System.Collections.Generic;
-using Alura.LeilaoOnline.WebApp.Models;
 using Alura.LeilaoOnline.WebApp.Dados;
+using System.Linq;
 
 namespace Alura.LeilaoOnline.WebApp.Seeding
 {
@@ -9,20 +8,17 @@ namespace Alura.LeilaoOnline.WebApp.Seeding
     {
         public static void Seed()
         {
-            using (var ctx = new AppDbContext())
-            {
-                if (ctx.Database.EnsureCreated())
-                {
-                    var generator = new LeilaoRandomGenerator(new Random());
-                    var leiloes = new List<Leilao>();
-                    for (var i = 1; i <= 200; i++)
-                    {
-                        leiloes.Add(generator.NovoLeilao);
-                    }
-                    ctx.Leiloes.AddRange(leiloes);
-                    ctx.SaveChanges();
-                }
-            }
+            using var ctx = new AppDbContext();
+
+            if (!ctx.Database.EnsureCreated()) return;
+
+            var generator = new LeilaoRandomGenerator(new Random());
+            var leiloes = Enumerable.Range(1, 200)
+                .Select(i => generator.NovoLeilao)
+                .ToList();
+
+            ctx.Leiloes.AddRange(leiloes);
+            ctx.SaveChanges();
         }
     }
 }
